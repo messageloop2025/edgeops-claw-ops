@@ -1,0 +1,43 @@
+{
+  "id": "claw-ops",
+  "name": "Claw Ops (EdgeOps)",
+  "description": "Manage EdgeOps hosts, groups, and remote commands from OpenClaw agents.",
+  "version": "0.1.0",
+  "contracts": {
+    "tools": [
+      "edgeops_list_hosts",
+      "edgeops_host_execute",
+      "edgeops_gateway_ping"
+    ]
+  },
+  "uiHints": {
+    "baseUrl": {
+      "label": "EdgeOps base URL",
+      "help": "e.g. http://127.0.0.1:8010 — no trailing slash",
+      "placeholder": "http://127.0.0.1:8010"
+    },
+    "accessToken": {
+      "label": "Bearer access token",
+      "help": "JWT from POST /api/auth/login",
+      "sensitive": true,
+      "placeholder": "eyJ..."
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["baseUrl", "accessToken"],
+    "properties": {
+      "baseUrl": {
+        "type": "string",
+        "minLength": 1,
+        "description": "EdgeOps HTTP root (scheme + host + optional port)."
+      },
+      "accessToken": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Authorization Bearer token for EdgeOps API."
+      }
+    }
+  }
+}
