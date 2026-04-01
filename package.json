@@ -19,6 +19,7 @@
     "dist",
     "openclaw.plugin.json",
     "package.json",
+    "README.md",
     "OPENCLAW_INSTALL.md",
     "pack.bat",
     "pack.sh"
