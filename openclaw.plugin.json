@@ -1,42 +1,64 @@
 {
   "id": "claw-ops",
-  "name": "Claw Ops (EdgeOps)",
-  "description": "Manage EdgeOps hosts, groups, and remote commands from OpenClaw agents.",
-  "version": "0.1.0",
+  "name": "ClawOps · EdgeOps 运维",
+  "description": "ClawOps (claw-ops)：OpenClaw 侧 EdgeOps 运维 / ops 插件。edgeops_* 在 Gateway 内直连 EdgeOps API，无 EdgeOps Web 页/终端 UI 依赖；注入路由提示并可拦截本机 shell 调 EdgeOps。",
+  "version": "0.3.0",
   "contracts": {
     "tools": [
-      "edgeops_list_hosts",
-      "edgeops_host_execute",
-      "edgeops_gateway_ping"
+      "edgeops_ops_chat",
+      "edgeops_gateway_ping",
+      "edgeops_list_hosts"
     ]
   },
   "uiHints": {
     "baseUrl": {
       "label": "EdgeOps base URL",
-      "help": "e.g. http://127.0.0.1:8010 — no trailing slash",
-      "placeholder": "http://127.0.0.1:8010"
+      "help": "可选。省略时默认 https://ops.pinglan.cc；自建/其它环境请填写完整根地址，勿带末尾斜杠。",
+      "placeholder": "https://ops.pinglan.cc（可留空使用默认）"
     },
     "accessToken": {
-      "label": "Bearer access token",
-      "help": "JWT from POST /api/auth/login",
+      "label": "Bearer token",
+      "help": "Login JWT or personal API token (eop_...) from EdgeOps system settings",
       "sensitive": true,
-      "placeholder": "eyJ..."
+      "placeholder": "eop_..."
+    },
+    "appendOpenClawUiHints": {
+      "label": "Append OpenClaw display hints",
+      "help": "默认开启：每次 ops-chat 会在消息末尾附加「禁用 Mermaid/ECharts 等、仅用受限 Markdown」的说明，便于与 OpenClaw 展示能力对齐。若下游可渲染高级图表可关闭。"
+    },
+    "blockLocalEdgeOpsExec": {
+      "label": "Block local shell → EdgeOps",
+      "help": "默认开启：在 before_tool_call 拦截本机 exec/PowerShell/curl 等对已配置 EdgeOps 的 HTTP，迫使使用 edgeops_* 工具。调试 EdgeOps HTTP 时可关闭。"
+    },
+    "allowPromptInjection": {
+      "label": "Allow prompt hooks (OpenClaw)",
+      "help": "开启后会在系统提示中强调：运维 / ops / EdgeOps / ClawOps 相关意图须走 edgeops_* 工具，勿在本机 exec/curl EdgeOps。配置：openclaw.json → plugins.entries.claw-ops.hooks.allowPromptInjection: true；关闭则 before_prompt_build 不注入。"
+    },
+    "execApprovalsNote": {
+      "label": "Exec 审批弹窗（说明）",
+      "help": "插件**不能**在安装时自动关闭 OpenClaw 的 exec 安全策略。模型若用 bash/PowerShell 调 HTTP 而非 edgeops_list_hosts / edgeops_ops_chat，会触发 allowlist + on-miss 弹窗。若 agents/tools 使用 tools.profile: coding（或等价精简资料），须在 openclaw.json 的 tools.alsoAllow（或对应 agent 的 tools.alsoAllow）中加入插件 id「claw-ops」或具体工具名，否则 edgeops_* 不会出现在模型工具列表中。其余做法：(1) 让模型优先用本插件工具；(2) 在本机 ~/.openclaw/exec-approvals.json 为 agents.main 配置 security=full、ask=off（仅可信环境）；(3) 在弹窗中选 Always allow 写入白名单。"
     }
   },
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
-    "required": ["baseUrl", "accessToken"],
     "properties": {
       "baseUrl": {
         "type": "string",
         "minLength": 1,
-        "description": "EdgeOps HTTP root (scheme + host + optional port)."
+        "description": "可选。EdgeOps HTTP 根地址；不填则使用默认 https://ops.pinglan.cc。"
       },
       "accessToken": {
         "type": "string",
-        "minLength": 1,
-        "description": "Authorization Bearer token for EdgeOps API."
+        "description": "EdgeOps Bearer：JWT 或 eop_ API token。可先装插件再在配置里填写；调用工具前必填。"
+      },
+      "appendOpenClawUiHints": {
+        "type": "boolean",
+        "description": "默认 true：edgeops_ops_chat 自动附加 OpenClaw 展示约束（禁用高级图表、收敛为普通 Markdown）。设为 false 则不加后缀。"
+      },
+      "blockLocalEdgeOpsExec": {
+        "type": "boolean",
+        "description": "默认 true：拦截本机 exec 类工具中对 EdgeOps 的 HTTP 客户端调用，强制走 edgeops_* 插件。"
       }
     }
   }
