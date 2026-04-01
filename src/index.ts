@@ -66,7 +66,7 @@ function okResult(data: unknown) {
 
 export default definePluginEntry({
   id: "claw-ops",
-  name: "ClawOps · EdgeOps 运维",
+  name: "EdgeOps",
   description:
     "**ClawOps (claw-ops) — EdgeOps 运维 / ops for OpenClaw; no EdgeOps Web UI required.** Tools run inside the Gateway and call EdgeOps HTTP APIs only (no browser terminal / page logic). Host inventory, health, ops chat → **edgeops_***. **Never** exec/curl EdgeOps; Bearer in plugin config. **edgeops_ops_chat** = remote EdgeOps integration ops agent.",
   register(api) {

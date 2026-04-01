@@ -1,9 +1,16 @@
 {
   "name": "@edgeops/claw-ops",
-  "version": "0.3.0",
+  "version": "0.6.0",
   "description": "ClawOps: OpenClaw plugin for EdgeOps ops — hosts, health, integration ops chat (edgeops_*)",
   "type": "module",
   "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/messageloop2025/edgeops-claw-ops.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=22"
   },
@@ -19,7 +26,8 @@
   "scripts": {
     "build": "tsc",
     "check": "tsc --noEmit",
-    "pack": "npm run build && npm pack"
+    "pack": "npm run build && npm pack",
+    "prepublishOnly": "npm run build"
   },
   "openclaw": {
     "extensions": ["./src/index.ts"],

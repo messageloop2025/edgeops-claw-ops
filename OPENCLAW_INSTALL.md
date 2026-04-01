@@ -51,10 +51,10 @@ npm run check
 npm run pack
 ```
 
-会在 **`claw-ops` 当前目录**生成类似 `edgeops-claw-ops-0.3.0.tgz` 的文件（具体文件名以 `package.json` 的 `name` / `version` 为准）。将该文件复制到目标机器后安装：
+会在 **`claw-ops` 当前目录**生成类似 `edgeops-claw-ops-0.6.0.tgz` 的文件（具体文件名以 `package.json` 的 `name` / `version` 为准）。将该文件复制到目标机器后安装：
 
 ```bash
-openclaw plugins install ./edgeops-claw-ops-0.3.0.tgz
+openclaw plugins install ./edgeops-claw-ops-0.6.0.tgz
 ```
 
 ---
@@ -88,7 +88,7 @@ Windows 同样传入绝对路径（注意引号）。
 ### 3.3 从 npm 包 tarball 安装
 
 ```bash
-openclaw plugins install ./edgeops-claw-ops-0.3.0.tgz
+openclaw plugins install ./edgeops-claw-ops-0.6.0.tgz
 ```
 
 ### 3.4 验证
