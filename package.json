@@ -3,7 +3,7 @@
   "version": "0.6.0",
   "description": "ClawOps: OpenClaw plugin for EdgeOps ops — hosts, health, integration ops chat (edgeops_*)",
   "type": "module",
-  "license": "UNLICENSED",
+  "license": "MIT-0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/messageloop2025/edgeops-claw-ops.git"
@@ -19,6 +19,7 @@
     "dist",
     "openclaw.plugin.json",
     "package.json",
+    "LICENSE",
     "README.md",
     "OPENCLAW_INSTALL.md",
     "pack.bat",

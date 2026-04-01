@@ -62,4 +62,4 @@
 
 ## 许可证
 
-见 `package.json` 的 `license` 字段（当前为 `UNLICENSED`）。
+**MIT-0**（[MIT No Attribution](https://spdx.org/licenses/MIT-0.html)）：与常见 MIT 类似，但**不要求**再分发时附带版权或许可正文。全文见仓库根目录 [`LICENSE`](./LICENSE)；`package.json` 中 `license` 字段为 `MIT-0`。
