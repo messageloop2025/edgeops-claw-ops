@@ -99,15 +99,124 @@ openclaw plugins inspect claw-ops
 openclaw plugins doctor
 ```
 
+### 3.5 从 ClawHub 安装（命令行）
+
+插件发布到 [ClawHub](https://clawhub.ai/) 后，可用 **OpenClaw 原生命令**安装（无需先下载 `.tgz`）：
+
+```bash
+# 将 <slug> 换成 ClawHub 上该包的实际标识（与发布名称一致，以 clawhub.ai 展示为准）
+openclaw plugins install clawhub:<slug>
+```
+
+示例（**占位**，真实 slug 以 ClawHub 页面为准）：
+
+```bash
+openclaw plugins install clawhub:edgeops-claw-ops
+```
+
+更新已安装的 ClawHub 插件：
+
+```bash
+openclaw plugins update --all
+# 或仅更新某一插件（名称以 openclaw plugins list 为准）
+openclaw plugins update claw-ops
+```
+
+安装后仍需配置 **`plugins.entries.claw-ops.config`**（见下节「全命令行配置」），并视情况配置 **`tools.alsoAllow`**（见 §5.1）。
+
 ---
 
-## 4. EdgeOps URL 与密钥（KEY）配置
+## 4. EdgeOps URL、KEY 与插件开关（全命令行示例）
 
-在 **`openclaw.json`** 的 `plugins` 段增加或合并如下结构（字段名需与实际 OpenClaw 版本一致；下列为常见形态）。
+**默认 EdgeOps 根 URL**：插件未配置 `baseUrl` 时，会回退到内置默认 **`https://ops.pinglan.cc`**（与 `client.ts` 中常量一致）。**自建实例**请显式设为你的域名；下列示例以公网默认为例。
 
-### 4.1 `plugins.allow`
+配置均通过 **`openclaw config set`** 写入 **`openclaw.json`**。可先查看配置文件路径：
 
-允许加载该插件：
+```bash
+openclaw config file
+```
+
+批量写入时可用 **`--dry-run`** 先校验（见 §4.4）。
+
+### 4.1 逐项写入（bash / macOS / Linux）
+
+```bash
+# 启用插件 + 注入路由提示（推荐）
+openclaw config set plugins.entries.claw-ops.enabled true --strict-json
+openclaw config set plugins.entries.claw-ops.hooks.allowPromptInjection true --strict-json
+
+# EdgeOps 根地址（默认公网；自建请改 URL）
+openclaw config set plugins.entries.claw-ops.config.baseUrl "https://ops.pinglan.cc" --strict-json
+
+# Token：方式 A — 直接从环境变量读取（推荐，避免明文进配置文件）
+# 先在 shell 中 export EDGEOPS_TOKEN='eop_xxx' 再执行：
+openclaw config set plugins.entries.claw-ops.config.accessToken \
+  --ref-provider default --ref-source env --ref-id EDGEOPS_TOKEN
+
+# Token：方式 B — 明文写入（仅用于本机快速试验；勿截图、勿提交 git）
+openclaw config set plugins.entries.claw-ops.config.accessToken '"eop_你的令牌"' --strict-json
+```
+
+### 4.2 逐项写入（Windows PowerShell）
+
+```powershell
+openclaw config set plugins.entries.claw-ops.enabled true --strict-json
+openclaw config set plugins.entries.claw-ops.hooks.allowPromptInjection true --strict-json
+openclaw config set plugins.entries.claw-ops.config.baseUrl https://ops.pinglan.cc
+
+# Token：环境变量（推荐。先执行：$env:EDGEOPS_TOKEN = "eop_..."）
+openclaw config set plugins.entries.claw-ops.config.accessToken --ref-provider default --ref-source env --ref-id EDGEOPS_TOKEN
+
+# 明文 token 在 PowerShell 引号易踩坑，建议用 §4.4 批量文件，或 bash 运行 §4.1
+```
+
+若需一次性写入多项含字符串的配置，在 Windows 上优先 **§4.4 批量 JSON**。
+
+### 4.3 `plugins.allow`（允许加载插件 ID）
+
+仅当配置里**还没有**其它插件，或你愿意**覆盖**整个列表时：
+
+```bash
+openclaw config set plugins.allow '["claw-ops"]' --strict-json
+```
+
+若已有 `qqbot`、`google` 等，请先读出再合并，**不要把原列表覆盖掉**：
+
+```bash
+openclaw config get plugins.allow
+```
+
+将输出中的数组**加上** `"claw-ops"` 后一次性设置，例如：
+
+```bash
+openclaw config set plugins.allow '["claw-ops","qqbot","google"]' --strict-json
+```
+
+（顺序无所谓，以你本机实际插件名为准。）
+
+### 4.4 批量写入（任选平台，推荐）
+
+新建文件 `claw-ops-openclaw.batch.json`（内容按需改掉 token / URL）：
+
+```json
+[
+  { "path": "plugins.entries.claw-ops.enabled", "value": true },
+  { "path": "plugins.entries.claw-ops.hooks.allowPromptInjection", "value": true },
+  { "path": "plugins.entries.claw-ops.config.baseUrl", "value": "https://ops.pinglan.cc" },
+  { "path": "plugins.entries.claw-ops.config.accessToken", "value": "eop_REPLACE_ME" }
+]
+```
+
+执行（**勿**把含真实 token 的文件提交到 git）：
+
+```bash
+openclaw config set --batch-file ./claw-ops-openclaw.batch.json --dry-run
+openclaw config set --batch-file ./claw-ops-openclaw.batch.json
+```
+
+批量模式**不能**与 `--ref-provider` 混用；若要用环境变量引用 token，请对 `accessToken` 单独执行 **§4.1** 中的 `ref` 命令，或把 batch 里该项删掉后单独 `config set ... --ref-source env ...`。
+
+### 4.5 与手工编辑 JSON 等价的结构（对照）
 
 ```json
 "plugins": {
@@ -119,7 +228,7 @@ openclaw plugins doctor
         "allowPromptInjection": true
       },
       "config": {
-        "baseUrl": "https://your-edgeops.example.com",
+        "baseUrl": "https://ops.pinglan.cc",
         "accessToken": "eop_xxxxxxxx"
       }
     }
@@ -129,13 +238,13 @@ openclaw plugins doctor
 
 | 字段 | 含义 |
 |------|------|
-| `baseUrl` | EdgeOps **根地址**，无末尾 `/`。省略时插件可能使用内置默认公网地址；**自建**请必填正确 URL。 |
-| `accessToken` | EdgeOps **Bearer**：登录 JWT 或 `eop_` API Token（在 EdgeOps 系统设置中创建）。**勿**提交到仓库。 |
-| `hooks.allowPromptInjection` | 建议 `true`：注入「须用 `edgeops_*`、勿本机 curl EdgeOps」等系统说明。 |
+| `baseUrl` | EdgeOps **根地址**，无末尾 `/`。未设置时插件默认 **`https://ops.pinglan.cc`**；自建必填你的 URL。 |
+| `accessToken` | EdgeOps **Bearer**：JWT 或 `eop_` API Token。**勿**提交到仓库；优先 **env + SecretRef**（§4.1 方式 A）。 |
+| `hooks.allowPromptInjection` | 建议 `true`：注入须用 `edgeops_*`、勿本机 curl EdgeOps 等说明。 |
 
-若安装方式在 `plugins.installs.claw-ops` 写了 `sourcePath`，仅影响**扩展来源路径**；**`baseUrl` / `accessToken`仍以 `plugins.entries.claw-ops.config` 为准**。
+若 `plugins.installs.claw-ops` 中记录了 `sourcePath`，只影响**扩展来源**；**URL / TOKEN 以 `plugins.entries.claw-ops.config` 为准**。
 
-**校验配置：**
+**校验：**
 
 ```bash
 openclaw config validate
@@ -143,29 +252,29 @@ openclaw config validate
 
 ---
 
-## 5. 权限与策略（OpenClaw 侧）
+## 5. 权限与策略（OpenClaw 侧，命令行 + 说明）
 
 插件**不会**替你把网关的 exec 安全策略全部关掉；若模型仍尝试 `exec` + HTTP 调 EdgeOps，可能触发审批。
 
-### 5.1 工具白名单（`tools.profile: coding` 等）
+### 5.1 工具白名单（`tools.profile: coding` 等）——命令行
 
-若使用精简工具 **profile**（如 `coding`），需把插件工具放进允许列表，否则模型**看不到** `edgeops_*`：
+若使用精简工具 **profile**（如 `coding`），须把插件放进 **`tools.alsoAllow`**（或等价配置），否则模型**看不到** `edgeops_*`。
 
-```json
-"tools": {
-  "profile": "coding",
-  "alsoAllow": ["claw-ops"]
-}
+仅当列表为空或你可覆盖整个数组时：
+
+```bash
+openclaw config set tools.alsoAllow '["claw-ops"]' --strict-json
 ```
 
-或在对应 `agents.list[].tools` 中配置等价 `alsoAllow` / `allow`（以 OpenClaw 文档为准）。**勿**在同一作用域同时设置冲突的 `allow` 与 `alsoAllow`（OpenClaw 会校验）。
+若已有其它项，先 `openclaw config get tools.alsoAllow`，合并后再 `config set`。**勿**在同一作用域同时配置冲突的 `tools.allow` 与 `tools.alsoAllow`（OpenClaw 会校验）。
+
+按 agent 细粒度控制时，路径可能是 `agents.list[].tools.alsoAllow`，需编辑 `openclaw.json` 或使用支持你本机 OpenClaw 版本的 dot path（可用 `openclaw config schema` 查阅）。
 
 ### 5.2 Exec 审批（可选）
 
-- 网关/exec 若采用 **allowlist + on-miss**，模型误用 shell 访问 EdgeOps 时会出现审批弹窗。
-- 处理思路：**优先走 `edgeops_*`**；或在可信环境下调整 `exec-approvals` / 网关策略（仅管理员、自担风险）。
-
-具体文件名与 JSON 结构以你安装的 OpenClaw 版本为准；路径均在 **用户目录下的 `.openclaw`**。
+- 网关若采用 **allowlist + on-miss**，模型误用 shell 访问 EdgeOps 时会出现审批弹窗。
+- **处理思路**：优先走 `edgeops_*`；在可信环境下再在 **`.openclaw`** 下调整 exec 审批相关配置（文件名以安装版本为准，如 `exec-approvals.json`）。
+- 该文件多数情况下需**手工编辑**或通过 Control UI 配置；是否提供 `openclaw config set` 路径依版本而定，可将 `openclaw config schema` 的输出保存后搜索 `exec`。
 
 ### 5.3 重启 Gateway
 
