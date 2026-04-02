@@ -28,15 +28,20 @@
 
 ---
 
-## 配置要点
+## 配置要点（必须配齐才能工作）
 
-在 `openclaw.json` 的 `plugins.entries.claw-ops` 中常见字段：
+**未在 `openclaw.json` 中正确配置时，`edgeops_*` 不可用或不会出现在模型工具列表中。**
 
-- **`baseUrl`**：EdgeOps 根地址，无尾部 `/`。未配置时默认 **`https://ops.pinglan.cc`**。
-- **`accessToken`**：JWT 或 `eop_` 个人 API Token。
-- **`hooks.allowPromptInjection`**：建议 `true`，启用路由提示注入。
+| 项 | 说明 |
+|----|------|
+| `plugins.allow` | **可选**。若配置了**非空** `plugins.allow`，则**必须**含 **`"claw-ops"`** 才会加载本插件；未配置或为空时插件仍可能被自动发现（官方会建议改为显式白名单）。 |
+| `plugins.entries.claw-ops` | `enabled: true`；`hooks.allowPromptInjection` 建议 **`true`**。 |
+| `plugins.entries.claw-ops.config.baseUrl` | **可修改**；省略时默认 **`https://ops.pinglan.cc`**（自建请填实际根地址，无尾斜杠）。 |
+| `plugins.entries.claw-ops.config.accessToken` | **必填**（EdgeOps JWT 或 **`eop_`** Token）。 |
+| `config.appendOpenClawUiHints` / `config.blockLocalEdgeOpsExec` | 写在 **`config`** 下（**不是** `hooks`）；可按需设为 `true`/`false`。 |
+| `tools.alsoAllow` | 使用 **`tools.profile: coding`** 等精简集时须含 **`"claw-ops"`**。 |
 
-若使用 `tools.profile: coding` 等精简工具集，需在 **`tools.alsoAllow`**（或等价策略）中加入 **`claw-ops`**，否则模型看不到插件工具。
+完整可合并示例：**[openclaw.claw-ops.example.json](./openclaw.claw-ops.example.json)**（填入真实 `accessToken` 后合并进 `~/.openclaw/openclaw.json`）。
 
 详细安装、命令行改配置、ClawHub、打包与跨平台说明见 **[OPENCLAW_INSTALL.md](./OPENCLAW_INSTALL.md)**。
 

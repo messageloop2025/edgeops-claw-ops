@@ -2,7 +2,7 @@
   "id": "claw-ops",
   "name": "EdgeOps",
   "description": "EdgeOps (claw-ops)：OpenClaw 侧 EdgeOps 运维 / ops 插件。edgeops_* 在 Gateway 内直连 EdgeOps API，无 EdgeOps Web 页/终端 UI 依赖；注入路由提示并可拦截本机 shell 调 EdgeOps。",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "contracts": {
     "tools": [
       "edgeops_ops_chat",
@@ -11,6 +11,10 @@
     ]
   },
   "uiHints": {
+    "openclawConfigRequired": {
+      "label": "openclaw.json 必配（否则无法工作）",
+      "help": "本插件须在 OpenClaw 配置文件（通常为 ~/.openclaw/openclaw.json）中完整登记后才能使用 edgeops_*：① plugins.allow 为可选；若已设置非空白名单则必须含 \"claw-ops\"，否则本插件不可加载（未设或为空时仍可能被自动发现，官方建议显式列出可信 id）；② plugins.entries.claw-ops 含 enabled: true、hooks.allowPromptInjection（强烈建议 true，false 会阻止 before_prompt_build 等注入类钩子）、以及 config；③ config.accessToken 为必填，填 EdgeOps 登录 JWT 或个人 API Token（eop_…），无令牌则工具调用会失败；④ config.baseUrl 可修改为自建 EdgeOps 根地址（无尾斜杠），省略时插件内默认 https://ops.pinglan.cc；⑤ appendOpenClawUiHints、blockLocalEdgeOpsExec 只写在 plugins.entries.claw-ops.config 下，不要写在 hooks 里；⑥ 若 agents/tools 使用 tools.profile: coding（或等价精简集），须在 tools.alsoAllow 中加入 \"claw-ops\"，否则模型看不到插件工具。完整可合并示例见包内 openclaw.claw-ops.example.json。"
+    },
     "baseUrl": {
       "label": "EdgeOps base URL",
       "help": "可选。省略时默认 https://ops.pinglan.cc；自建/其它环境请填写完整根地址，勿带末尾斜杠。",
@@ -32,7 +36,7 @@
     },
     "allowPromptInjection": {
       "label": "Allow prompt hooks (OpenClaw)",
-      "help": "开启后会在系统提示中强调：运维 / ops / EdgeOps / ClawOps 相关意图须走 edgeops_* 工具，勿在本机 exec/curl EdgeOps。配置：openclaw.json → plugins.entries.claw-ops.hooks.allowPromptInjection: true；关闭则 before_prompt_build 不注入。"
+      "help": "写在 hooks 下（非 config）。建议 true：系统提示中强调须走 edgeops_*。路径：plugins.entries.claw-ops.hooks.allowPromptInjection。另：appendOpenClawUiHints / blockLocalEdgeOpsExec 必须写在 plugins.entries.claw-ops.config 下。"
     },
     "execApprovalsNote": {
       "label": "Exec 审批弹窗（说明）",
@@ -46,11 +50,11 @@
       "baseUrl": {
         "type": "string",
         "minLength": 1,
-        "description": "可选。EdgeOps HTTP 根地址；不填则使用默认 https://ops.pinglan.cc。"
+        "description": "可修改。EdgeOps HTTP 根地址（无尾斜杠）；自建请填实际域名。省略时默认 https://ops.pinglan.cc。"
       },
       "accessToken": {
         "type": "string",
-        "description": "EdgeOps Bearer：JWT 或 eop_ API token。可先装插件再在配置里填写；调用工具前必填。"
+        "description": "必填。EdgeOps Bearer：JWT 或 eop_ API token。未配置则 edgeops_* 无法调用。勿提交到公共仓库。"
       },
       "appendOpenClawUiHints": {
         "type": "boolean",

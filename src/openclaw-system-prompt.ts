@@ -8,6 +8,7 @@ export function buildClawOpsPrependSystemContext(baseUrl: string): string {
   const root = (baseUrl || DEFAULT_EDGEOPS_BASE_URL).trim();
   return [
     "## ClawOps（claw-ops）· EdgeOps 运维插件",
+    `- **OpenClaw 配置（前提）**：须在 \`openclaw.json\` 中启用本插件并填写 **必填** 的 \`plugins.entries.claw-ops.config.accessToken\`（EdgeOps JWT 或 \`eop_\`），**可选/可改** 的 \`config.baseUrl\`（默认 \`${root}\`）；\`plugins.allow\` 须含 \`claw-ops\`；使用 \`tools.profile: coding\` 时 **还须** \`tools.alsoAllow\` 含 \`claw-ops\`。缺任一项则 \`edgeops_*\` 不可用或不出现在工具列表。详见插件包内 \`openclaw.claw-ops.example.json\`。`,
     `- **执行流（无 EdgeOps Web 页逻辑）**：ClawOps 只在 **OpenClaw Gateway / 插件进程** 内运行；工具通过 **HTTP 直接访问 EdgeOps REST API**（如 /api/integration/ops-chat/complete）。**不依赖**打开 EdgeOps 浏览器界面、**不依赖**网页里的「AI 聊天 / 主机终端」DOM 或 WebSocket 控制台；运维推理在 **EdgeOps 服务端** 完成，与是否有人打开网页无关。`,
     `- **关键词**：只要涉及 **运维 / ops / EdgeOps / ClawOps / 主机 / 服务器 / 巡检 / 排障 / 变更 / 配置 / 上线** 等与 EdgeOps 平台相关的意图，**优先**使用本插件的 \`edgeops_*\` 工具（ClawOps 路由），不要用「自己写 HTTP」或本机 shell 模拟同款能力。`,
     `- **edgeops_gateway_ping**：探活 EdgeOps、查服务端版本（运维入口健康检查）。`,

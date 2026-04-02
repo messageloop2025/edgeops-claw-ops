@@ -51,10 +51,10 @@ npm run check
 npm run pack
 ```
 
-会在 **`claw-ops` 当前目录**生成类似 `edgeops-claw-ops-0.6.0.tgz` 的文件（具体文件名以 `package.json` 的 `name` / `version` 为准）。将该文件复制到目标机器后安装：
+会在 **`claw-ops` 当前目录**生成类似 `edgeops-claw-ops-0.7.0.tgz` 的文件（具体文件名以 `package.json` 的 `name` / `version` 为准）。将该文件复制到目标机器后安装：
 
 ```bash
-openclaw plugins install ./edgeops-claw-ops-0.6.0.tgz
+openclaw plugins install ./edgeops-claw-ops-0.7.0.tgz
 ```
 
 ---
@@ -88,7 +88,7 @@ Windows 同样传入绝对路径（注意引号）。
 ### 3.3 从 npm 包 tarball 安装
 
 ```bash
-openclaw plugins install ./edgeops-claw-ops-0.6.0.tgz
+openclaw plugins install ./edgeops-claw-ops-0.7.0.tgz
 ```
 
 ### 3.4 验证
@@ -127,6 +127,8 @@ openclaw plugins update claw-ops
 ---
 
 ## 4. EdgeOps URL、KEY 与插件开关（全命令行示例）
+
+**配置是前置条件**：须在 `openclaw.json` 中完成 `plugins.entries.claw-ops`（**必填** `config.accessToken`，**可改** `config.baseUrl`）、以及在 `tools.profile: coding` 场景下的 `tools.alsoAllow`（含 `claw-ops`），否则 `edgeops_*` 无法正常工作。`plugins.allow` 在 OpenClaw 里为**可选**白名单：官方说明为「**若已设置（非空），则仅列表内插件可加载**」——此时**必须**包含 `"claw-ops"`；若未设置或为空，非捆绑插件仍**可能**被自动发现加载（网关会告警并建议显式列出可信 ID），故生产/多插件环境仍**强烈建议**配置 `plugins.allow` 并纳入 `claw-ops`。`appendOpenClawUiHints`、`blockLocalEdgeOpsExec` 仅写在 **`plugins.entries.claw-ops.config`**，不要写在 `hooks` 里。包内合并示例：**`openclaw.claw-ops.example.json`**。
 
 **默认 EdgeOps 根 URL**：插件未配置 `baseUrl` 时，会回退到内置默认 **`https://ops.pinglan.cc`**（与 `client.ts` 中常量一致）。**自建实例**请显式设为你的域名；下列示例以公网默认为例。
 
@@ -172,7 +174,9 @@ openclaw config set plugins.entries.claw-ops.config.accessToken --ref-provider d
 
 若需一次性写入多项含字符串的配置，在 Windows 上优先 **§4.4 批量 JSON**。
 
-### 4.3 `plugins.allow`（允许加载插件 ID）
+### 4.3 `plugins.allow`（插件 ID 白名单，可选）
+
+与 OpenClaw 运行时配置说明一致：`plugins.allow` 为**可选**；**仅当该数组存在且非空时**，才表示「只允许这些插件参与加载」——列表中若无 `claw-ops`，本插件将**不会**被加载。未配置或为空时，行为更宽松（非捆绑插件可能被自动发现，官方日志会提示设置显式白名单）。
 
 仅当配置里**还没有**其它插件，或你愿意**覆盖**整个列表时：
 
