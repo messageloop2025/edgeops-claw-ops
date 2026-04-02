@@ -9,6 +9,7 @@
 **安装（不依赖 ClawHub 时推荐）**  
 - **离线包**：仓库内 `npm run pack` → 将生成的 **`edgeops-claw-ops-*.tgz`** 拷到目标机 → `openclaw plugins install <tgz 路径>`。  
 - **npm**：包已 **`npm publish`** 后 → `openclaw plugins install @edgeops/claw-ops@x.y.z`（**`x.y.z`** 与 `package.json` 的 `version` 一致；或用 `@latest` 等 **tag**，勿写 `npm:` 前缀、勿用 `^` 范围）。ClawHub 忙/429 时作用域包可能仍先撞 ClawHub，**优先用离线 `.tgz` 或本地目录安装**。  
+- **npm 装不上/很慢**：可先设 **`npm_config_registry`**（如 `https://registry.npmmirror.com`）再执行 `openclaw plugins install …`，与常见 `npx … --registry=…` 同类；**不能**解决 ClawHub 限流，详见 **[OPENCLAW_INSTALL.md §3.7](./OPENCLAW_INSTALL.md)**。  
 - 详表与 ClawHub 说明见 **[OPENCLAW_INSTALL.md §3](./OPENCLAW_INSTALL.md)**。
 
 ---
