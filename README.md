@@ -2,9 +2,14 @@
 
 在 [OpenClaw](https://docs.openclaw.ai/) 网关内连接 **EdgeOps**，用统一工具完成 **主机资产、探活、集成运维对话**，无需在聊天里手写 `curl` / PowerShell 调 EdgeOps API。
 
-**npm 包**：`@edgeops/claw-ops`  
+**npm 包名**：`@edgeops/claw-ops`（需在 registry 发布后，方可用于 **`openclaw plugins install @edgeops/claw-ops@<版本>`**；未发布时正常现象）  
 **插件 ID**：`claw-ops`（`openclaw.json` 里 `plugins.entries.claw-ops`）  
-**版本**：与 EdgeOps 产品版本对齐时见 `package.json` / `openclaw.plugin.json`（当前默认与仓库 `config.py` 中 `VERSION` 一致）。
+**版本**：见 `package.json` / `openclaw.plugin.json`（与 EdgeOps 产品对齐时可对照仓库 `config.py` 中 `VERSION`）。
+
+**安装（不依赖 ClawHub 时推荐）**  
+- **离线包**：仓库内 `npm run pack` → 将生成的 **`edgeops-claw-ops-*.tgz`** 拷到目标机 → `openclaw plugins install <tgz 路径>`。  
+- **npm**：包已 **`npm publish`** 后 → `openclaw plugins install @edgeops/claw-ops@x.y.z`（**`x.y.z`** 与 `package.json` 的 `version` 一致；或用 `@latest` 等 **tag**，勿写 `npm:` 前缀、勿用 `^` 范围）。ClawHub 忙/429 时作用域包可能仍先撞 ClawHub，**优先用离线 `.tgz` 或本地目录安装**。  
+- 详表与 ClawHub 说明见 **[OPENCLAW_INSTALL.md §3](./OPENCLAW_INSTALL.md)**。
 
 ---
 
