@@ -57,7 +57,7 @@ npm run pack
 
 ## 3. 安装插件（命令）
 
-近期 **ClawHub** 访问量大时容易出现 **429 限流**；**离线 `.tgz` / 本机目录**等**不依赖 ClawHub**；若仅 **npm 官方 registry 网络差**，可再配合 **§3.7 镜像**。与 ClawHub 安装（§3.6）对照使用。
+近期 **ClawHub** 访问量大时容易出现 **429 限流**；访问 **`clawhub.ai` 较慢或不稳定**时，可优先使用 ClawHub **中国官方镜像** [https://mirror-cn.clawhub.com](https://mirror-cn.clawhub.com)（配置见 **§3.6**）。**离线 `.tgz` / 本机目录**等**不依赖 ClawHub**；若仅 **npm 官方 registry 网络差**，可再配合 **§3.7 npm 镜像**。与 ClawHub 安装（§3.6）对照使用。
 
 ### 3.0 安装方式一览
 
@@ -68,7 +68,7 @@ npm run pack
 | **npm + 镜像** | 设置 `npm_config_registry` 等后执行同上 install | 连官方 registry **超时/失败**时；见 **§3.7**。 |
 | 本机源码目录 | `openclaw plugins install /path/to/claw-ops` | 本机有克隆仓库；见 §3.3。 |
 | `--link` | `openclaw plugins install --link /path/to/claw-ops` | 开发调试；见 §3.4。 |
-| **ClawHub** | `openclaw plugins install clawhub:…` | 无 429、且包已在 ClawHub 上架；见 §3.6。 |
+| **ClawHub** | `openclaw plugins install clawhub:…` | 无 429、且包已在 ClawHub 上架；国内可配镜像见 §3.6。 |
 
 安装后均需 **重启 Gateway**；并配置 **`plugins.entries.claw-ops`** 等（§4）。
 
@@ -137,6 +137,37 @@ openclaw plugins doctor
 ### 3.6 从 ClawHub 安装（可选）
 
 插件发布到 [ClawHub](https://clawhub.ai/) 后，可用：
+
+#### 国内镜像（中国大陆访问优化）
+
+ClawHub 提供**中国官方镜像站**：[https://mirror-cn.clawhub.com](https://mirror-cn.clawhub.com)（[ClawHub 中国官方镜像站](https://mirror-cn.clawhub.com)）。在向 `clawhub.ai` 拉取插件慢、超时或易遇限流时，可在执行安装命令**前**将 Registry 指向该镜像。
+
+与 [ClawHub CLI](https://github.com/openclaw/clawhub/blob/main/docs/cli.md) 一致，常用环境变量为：
+
+| 变量 | 含义 |
+|------|------|
+| `CLAWHUB_SITE` | 站点基址（浏览器登录等；默认 `https://clawhub.ai`） |
+| `CLAWHUB_REGISTRY` | Registry **API** 基址（未设置时通常与默认站点一致或由发现逻辑决定） |
+
+**bash / macOS / Linux**（当前终端一次性生效）：
+
+```bash
+export CLAWHUB_SITE=https://mirror-cn.clawhub.com
+export CLAWHUB_REGISTRY=https://mirror-cn.clawhub.com
+openclaw plugins install clawhub:<slug>
+```
+
+**Windows PowerShell**：
+
+```powershell
+$env:CLAWHUB_SITE = "https://mirror-cn.clawhub.com"
+$env:CLAWHUB_REGISTRY = "https://mirror-cn.clawhub.com"
+openclaw plugins install clawhub:<slug>
+```
+
+也可在 OpenClaw 的 `~/.openclaw/openclaw.json` 中 **`env`** 块写入上述键值（仅对缺失变量生效；优先级见 [OpenClaw 环境变量说明](https://docs.openclaw.ac.cn/help/environment)）。镜像与 **§3.7 的 npm registry 镜像**是两条线：前者解决 **ClawHub** 访问，后者解决 **npm 包**拉取。
+
+#### 安装命令
 
 ```bash
 # 将 <slug> 换成 ClawHub 上该包的实际标识（以 clawhub.ai 展示为准）
@@ -207,7 +238,7 @@ npm config delete registry
 
 **须注意**
 
-- **ClawHub 429、DNS 到 clawhub.ai 失败** 等，改 npm 镜像**通常无效**；请改用 **§3.1 离线 `.tgz`** 或 **§3.3 本地路径**，或稍后重试 ClawHub。  
+- **ClawHub 429、DNS 到 clawhub.ai 失败** 等，改 **npm** 镜像**通常无效**；可先试 **§3.6 国内 ClawHub 镜像**（`CLAWHUB_SITE` / `CLAWHUB_REGISTRY`），或改用 **§3.1 离线 `.tgz`** / **§3.3 本地路径**，或稍后重试。  
 - 镜像站与 **registry.npmjs.org** 同步可能有延迟；若镜像上暂无 `@edgeops/claw-ops`，可换其它可信镜像或临时切回官方。  
 - 示例域名 **https://registry.npmmirror.com** 为常用国内镜像（原 cnpm）；请只使用你信任的 registry。
 
