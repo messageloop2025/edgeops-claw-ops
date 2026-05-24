@@ -2,12 +2,20 @@
   "id": "claw-ops",
   "name": "EdgeOps",
   "description": "EdgeOps (claw-ops)：OpenClaw 侧 EdgeOps 运维 / ops 插件。edgeops_* 在 Gateway 内直连 EdgeOps API，无 EdgeOps Web 页/终端 UI 依赖；注入路由提示并可拦截本机 shell 调 EdgeOps。",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "contracts": {
     "tools": [
-      "edgeops_ops_chat",
       "edgeops_gateway_ping",
-      "edgeops_list_hosts"
+      "edgeops_list_hosts",
+      "edgeops_search_hosts",
+      "edgeops_search_hosts_by_prompt",
+      "edgeops_get_host",
+      "edgeops_get_host_prompt",
+      "edgeops_list_host_tags",
+      "edgeops_host_alive",
+      "edgeops_host_stats",
+      "edgeops_search_best_practices",
+      "edgeops_ops_chat"
     ]
   },
   "uiHints": {
