@@ -19,9 +19,13 @@
 
 | 能力 | 工具名 | 说明 |
 |------|--------|------|
-| **探活 / 版本** | `edgeops_gateway_ping` | `GET /api/version`，检查 EdgeOps 服务是否可达。 |
-| **主机列表** | `edgeops_list_hosts` | `GET /api/hosts`（支持分页），用于资产盘点、按 IP/名称检索主机。 |
-| **运维对话** | `edgeops_ops_chat` | `POST /api/integration/ops-chat/complete`，将自然语言运维需求交给 EdgeOps **集成运维 Agent**（服务端 Agent + 工具；适合排障、变更说明、多步运维）。 |
+| **探活 / 版本** | `edgeops_gateway_ping` | `GET /api/version` |
+| **主机列表** | `edgeops_list_hosts` | `GET /api/hosts`（分页） |
+| **主机检索** | `edgeops_search_hosts` | `GET /api/hosts/search`（别名/标签/remark） |
+| **提示词检索主机** | `edgeops_search_hosts_by_prompt` | `GET /api/integration/hosts/search-by-prompt` |
+| **主机详情 / 提示词 / 标签** | `edgeops_get_host` / `edgeops_get_host_prompt` / `edgeops_list_host_tags` | 解析 host_id 与约定 |
+| **探活 / 统计 / 最佳实践** | `edgeops_host_alive` / `edgeops_host_stats` / `edgeops_search_best_practices` | 轻量查询 |
+| **运维对话** | `edgeops_ops_chat` | `POST /api/integration/ops-chat/complete`（解析出 host_id 后请传入） |
 
 所有 HTTP 均在 **OpenClaw Gateway / 插件进程** 内通过 `fetch` 完成；**Bearer** 只来自插件配置 **或** OpenClaw 密钥引用，不应出现在本机 `exec` 或用户粘贴的命令里。
 
