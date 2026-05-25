@@ -1,25 +1,47 @@
 import { DEFAULT_EDGEOPS_BASE_URL } from "./client.js";
 
+
+
 /**
+
  * 注入到 Agent 系统提示（prependSystemContext），强调 ClawOps / EdgeOps 运维能力走 edgeops_* 远程工具，
+
  * 不要求、也不应在 OpenClaw 本机 exec/curl 调 EdgeOps。
+
  */
+
 export function buildClawOpsPrependSystemContext(baseUrl: string): string {
+
   const root = (baseUrl || DEFAULT_EDGEOPS_BASE_URL).trim();
+
   return [
+
     "## ClawOps（claw-ops）· EdgeOps 运维插件",
+
     `- **OpenClaw 配置（前提）**：须在 \`openclaw.json\` 中启用本插件并填写 **必填** 的 \`plugins.entries.claw-ops.config.accessToken\`（EdgeOps JWT 或 \`eop_\`），**可选/可改** 的 \`config.baseUrl\`（默认 \`${root}\`）；\`plugins.allow\` 须含 \`claw-ops\`；使用 \`tools.profile: coding\` 时 **还须** \`tools.alsoAllow\` 含 \`claw-ops\`。缺任一项则 \`edgeops_*\` 不可用或不出现在工具列表。详见插件包内 \`openclaw.claw-ops.example.json\`。`,
-    `- **执行流（无 EdgeOps Web 页逻辑）**：ClawOps 只在 **OpenClaw Gateway / 插件进程** 内运行；工具通过 **HTTP 直接访问 EdgeOps REST API**（如 /api/integration/ops-chat/complete）。**不依赖**打开 EdgeOps 浏览器界面、**不依赖**网页里的「AI 聊天 / 主机终端」DOM 或 WebSocket 控制台；运维推理在 **EdgeOps 服务端** 完成，与是否有人打开网页无关。`,
-    `- **关键词**：只要涉及 **运维 / ops / EdgeOps / ClawOps / 主机 / 服务器 / 巡检 / 排障 / 变更 / 配置 / 上线** 等与 EdgeOps 平台相关的意图，**优先**使用本插件的 \`edgeops_*\` 工具（ClawOps 路由），不要用「自己写 HTTP」或本机 shell 模拟同款能力。`,
-    `- **edgeops_gateway_ping**：探活 EdgeOps、查服务端版本（运维入口健康检查）。`,
-    `- **edgeops_list_hosts**：分页主机清单（全量盘点）。`,
-    `- **edgeops_search_hosts**：按名称/IP/**别名**/**标签名**/remark 检索 → 解析 host_id（用户提到具体机器/环境时**优先**）。`,
-    `- **edgeops_search_hosts_by_prompt**：在**主机级 AI 提示词**中检索能力/服务名词 → 解析 host_id。`,
-    `- **edgeops_list_host_tags** / **edgeops_get_host_prompt** / **edgeops_get_host**：标签列表、读主机提示词、主机详情。`,
-    `- **edgeops_search_best_practices**：检索最佳实践（keyword/category）。`,
-    `- **edgeops_host_alive** / **edgeops_host_stats**：单台探活、资产总数。`,
-    `- **edgeops_ops_chat**：自然语言运维交给 EdgeOps **集成 Agent**；解析出 host_id 后新开会话请传入，以便注入主机提示词/知识库。`,
-    `- 所有对 EdgeOps 的 **HTTP API 与运维 AI** 已由本插件封装；执行在 **EdgeOps 服务端**，**禁止**在 OpenClaw 本机用 exec / PowerShell / bash / curl / Invoke-RestMethod / fetch 请求 \`${root}\` 下 /api/hosts、/api/version、/api/integration/…。**Bearer 仅用插件配置，禁止**在命令或回复里拼接 \`eop_\`。`,
-    `- 需要结构化主机数据：先 \`edgeops_list_hosts\`，再在回复用 Markdown 概括；不要重复本地打同一接口。`,
+
+    `- **执行流（无 EdgeOps Web 页逻辑）**：ClawOps 只在 **OpenClaw Gateway / 插件进程** 内运行；工具通过 **HTTP 直接访问 EdgeOps REST API**。**不依赖**浏览器 SSH 终端 UI。`,
+
+    `- **关键词**：运维 / 主机 / 排障 / 变更 / 配置 / SSH → 优先 \`edgeops_*\`，禁止本机 exec/curl 打 EdgeOps。`,
+
+    `- **资产解析**：\`edgeops_search_hosts\` / \`edgeops_search_hosts_by_prompt\` / \`edgeops_get_host_prompt\` → 解析 host_id。`,
+
+    `- **非交互远程命令**：\`edgeops_ops_chat\` 内 Agent 会用 ssh_execute；ClawOps 侧也可直接编排。`,
+
+    `- **交互式 SSH（无界面）**：sudo 密码、vi、多步向导、Ctrl+C → **必须用** \`edgeops_ssh_channel_*\` 管道：create → send → read_lines/has_new → close；**禁止**用本机 shell 模拟 SSH。`,
+
+    `- **edgeops_ssh_channel_create**：建 TTY 通道；传 \`session_id\`（与 ops_chat 一致）绑定会话；默认 **600s** 无读写自动关。`,
+
+    `- **edgeops_ssh_channel_list(all_open=true)**：列出全部 open 通道（含 IP/别名/用途/提示词摘要）。`,
+
+    `- **edgeops_ssh_channel_send / read_lines / read / has_new / dump / close / close_batch**：读写管道；大输出 spill 后用 **edgeops_read_chat_data** 分段读全量。`,
+
+    `- **edgeops_ops_chat**：复杂编排仍可用集成 Agent；简单交互优先直连 ssh_channel 工具链。`,
+
+    `- Bearer 仅用插件配置；禁止在命令或回复里拼接 \`eop_\`。`,
+
   ].join("\n");
+
 }
+
+

@@ -5,6 +5,7 @@ import { createEdgeOpsClient, DEFAULT_EDGEOPS_BASE_URL } from "./client.js";
 import { shouldBlockLocalEdgeOpsShell } from "./edgeops-exec-guard.js";
 import { OPENCLAW_DOWNSTREAM_FORMAT_BLOCK } from "./openclaw-output-policy.js";
 import { buildClawOpsPrependSystemContext } from "./openclaw-system-prompt.js";
+import { registerSshChannelTools } from "./ssh-channel-tools.js";
 
 /** 安装/启动时可无 token；调用工具前再校验。 */
 function resolvePluginConfig(raw: Record<string, unknown> | undefined): {
@@ -348,5 +349,7 @@ export default definePluginEntry({
         return okResult(data);
       },
     });
+
+    registerSshChannelTools(api, () => clientOrThrow(cfg), okResult);
   },
 });

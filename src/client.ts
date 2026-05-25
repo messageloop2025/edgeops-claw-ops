@@ -252,5 +252,164 @@ export function createEdgeOpsClient(config: ClawOpsPluginConfig) {
         { timeoutMs: DEFAULT_FETCH_TIMEOUT_MS },
       );
     },
+
+    /** SSH 交互通道 — 创建 TTY 连接（POST /api/ssh-channel） */
+    async sshChannelCreate(body: {
+      host_id: number;
+      session_id?: number | null;
+      owner_type?: string;
+      owner_id?: string;
+      idle_close_sec?: number;
+      input_timeout_sec?: number;
+      output_timeout_sec?: number;
+    }): Promise<unknown> {
+      return requestJson(
+        "/api/ssh-channel",
+        { method: "POST", body: JSON.stringify(body) },
+        { timeoutMs: 120_000 },
+      );
+    },
+
+    async sshChannelList(params?: {
+      owner_type?: string;
+      owner_id?: string;
+      all_open?: boolean;
+    }): Promise<unknown> {
+      const qs = new URLSearchParams();
+      if (params?.owner_type) qs.set("owner_type", params.owner_type);
+      if (params?.owner_id) qs.set("owner_id", params.owner_id);
+      if (params?.all_open) qs.set("all_open", "true");
+      const suffix = qs.toString() ? `?${qs}` : "";
+      return requestJson(`/api/ssh-channel${suffix}`, { method: "GET" }, { timeoutMs: 60_000 });
+    },
+
+    async sshChannelInfo(channelId: number, checkAlive?: boolean): Promise<unknown> {
+      const qs = checkAlive ? "?check_alive=1" : "";
+      return requestJson(
+        `/api/ssh-channel/${channelId}${qs}`,
+        { method: "GET" },
+        { timeoutMs: 30_000 },
+      );
+    },
+
+    async sshChannelSend(channelId: number, content: string): Promise<unknown> {
+      return requestJson(
+        `/api/ssh-channel/${channelId}/send`,
+        { method: "POST", body: JSON.stringify({ content }) },
+        { timeoutMs: 60_000 },
+      );
+    },
+
+    async sshChannelReadLines(
+      channelId: number,
+      params?: {
+        from_line?: number;
+        to_line?: number;
+        last_n?: number;
+        since_line?: number;
+        spill?: boolean;
+        session_id?: number;
+      },
+    ): Promise<unknown> {
+      const qs = new URLSearchParams();
+      if (params?.from_line != null) qs.set("from_line", String(params.from_line));
+      if (params?.to_line != null) qs.set("to_line", String(params.to_line));
+      if (params?.last_n != null) qs.set("last_n", String(params.last_n));
+      if (params?.since_line != null) qs.set("since_line", String(params.since_line));
+      if (params?.spill === false) qs.set("spill", "false");
+      if (params?.session_id != null) qs.set("session_id", String(params.session_id));
+      const suffix = qs.toString() ? `?${qs}` : "";
+      return requestJson(
+        `/api/ssh-channel/${channelId}/lines${suffix}`,
+        { method: "GET" },
+        { timeoutMs: 120_000 },
+      );
+    },
+
+    async sshChannelRead(
+      channelId: number,
+      params?: { max_chars?: number; spill?: boolean; session_id?: number },
+    ): Promise<unknown> {
+      const qs = new URLSearchParams();
+      if (params?.max_chars != null) qs.set("max_chars", String(params.max_chars));
+      if (params?.spill === false) qs.set("spill", "false");
+      if (params?.session_id != null) qs.set("session_id", String(params.session_id));
+      const suffix = qs.toString() ? `?${qs}` : "";
+      return requestJson(
+        `/api/ssh-channel/${channelId}/read${suffix}`,
+        { method: "GET" },
+        { timeoutMs: 120_000 },
+      );
+    },
+
+    async sshChannelHasNew(channelId: number, afterLine?: number): Promise<unknown> {
+      const qs = new URLSearchParams();
+      if (afterLine != null) qs.set("after_line", String(afterLine));
+      const suffix = qs.toString() ? `?${qs}` : "";
+      return requestJson(
+        `/api/ssh-channel/${channelId}/has-new${suffix}`,
+        { method: "GET" },
+        { timeoutMs: 30_000 },
+      );
+    },
+
+    async sshChannelClose(channelId: number): Promise<unknown> {
+      return requestJson(
+        `/api/ssh-channel/${channelId}`,
+        { method: "DELETE" },
+        { timeoutMs: 30_000 },
+      );
+    },
+
+    async sshChannelDump(
+      channelId: number,
+      body?: { session_id?: number; max_chars?: number },
+    ): Promise<unknown> {
+      return requestJson(
+        `/api/ssh-channel/${channelId}/dump`,
+        { method: "POST", body: JSON.stringify(body ?? {}) },
+        { timeoutMs: 120_000 },
+      );
+    },
+
+    async sshChannelCloseBatch(body: {
+      session_id?: number;
+      owner_type?: string;
+      owner_id?: string;
+    }): Promise<unknown> {
+      return requestJson(
+        "/api/ssh-channel/close-batch",
+        { method: "POST", body: JSON.stringify(body) },
+        { timeoutMs: 60_000 },
+      );
+    },
+
+    /** 分段读取 spill 落盘（GET /api/integration/spill/read） */
+    async readSpill(params: {
+      spill_id: string;
+      date_subdir: string;
+      mode?: string;
+      session_id?: number;
+      head_chars?: number;
+      tail_chars?: number;
+      range_start?: number;
+      max_chars?: number;
+    }): Promise<unknown> {
+      const qs = new URLSearchParams({
+        spill_id: params.spill_id.trim(),
+        date_subdir: params.date_subdir.trim(),
+        mode: params.mode ?? "head_tail",
+      });
+      if (params.session_id != null) qs.set("session_id", String(params.session_id));
+      if (params.head_chars != null) qs.set("head_chars", String(params.head_chars));
+      if (params.tail_chars != null) qs.set("tail_chars", String(params.tail_chars));
+      if (params.range_start != null) qs.set("range_start", String(params.range_start));
+      if (params.max_chars != null) qs.set("max_chars", String(params.max_chars));
+      return requestJson(
+        `/api/integration/spill/read?${qs}`,
+        { method: "GET" },
+        { timeoutMs: 120_000 },
+      );
+    },
   };
 }
