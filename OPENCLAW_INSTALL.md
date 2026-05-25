@@ -1,5 +1,8 @@
 # ClawOps（claw-ops）— OpenClaw 安装与配置
 
+> 技术总览（Token、REST、MCP、claw-skills）：EdgeOps 主仓库 [docs/外部集成与ClawOps.md](../docs/外部集成与ClawOps.md)  
+> 用户向帮助：[web/aihelp/external-integration.md](../web/aihelp/external-integration.md)
+
 本文档适用于 **Windows、Linux、macOS**。ClawOps 在 **OpenClaw Gateway** 内执行：**直连 EdgeOps REST API**，**不依赖**打开 EdgeOps 网页、也**不依赖**网页里的 AI 聊天 / Web 终端 UI；运维在 **EdgeOps 服务端** 完成。
 
 ---

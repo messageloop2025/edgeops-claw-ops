@@ -25,7 +25,25 @@
 | **提示词检索主机** | `edgeops_search_hosts_by_prompt` | `GET /api/integration/hosts/search-by-prompt` |
 | **主机详情 / 提示词 / 标签** | `edgeops_get_host` / `edgeops_get_host_prompt` / `edgeops_list_host_tags` | 解析 host_id 与约定 |
 | **探活 / 统计 / 最佳实践** | `edgeops_host_alive` / `edgeops_host_stats` / `edgeops_search_best_practices` | 轻量查询 |
-| **运维对话** | `edgeops_ops_chat` | `POST /api/integration/ops-chat/complete`（解析出 host_id 后请传入） |
+| **运维对话** | `edgeops_ops_chat` | `POST /api/integration/ops-chat/complete` |
+
+### SSH 交互通道（无界面 TTY）
+
+| 能力 | 工具名 | 说明 |
+|------|--------|------|
+| 创建 | `edgeops_ssh_channel_create` | `POST /api/ssh-channel` |
+| 列表 | `edgeops_ssh_channel_list` | `GET /api/ssh-channel?all_open=true` |
+| 详情 | `edgeops_ssh_channel_info` | `GET /api/ssh-channel/{id}` |
+| 发送 | `edgeops_ssh_channel_send` | `POST …/send` |
+| 按行读 | `edgeops_ssh_channel_read_lines` | `GET …/lines` |
+| 按字符读 | `edgeops_ssh_channel_read` | `GET …/read` |
+| 有新输出 | `edgeops_ssh_channel_has_new` | `GET …/has-new` |
+| 关闭 | `edgeops_ssh_channel_close` | `DELETE …/{id}` |
+| 导出 spill | `edgeops_ssh_channel_dump` | `POST …/dump` |
+| 批量关 | `edgeops_ssh_channel_close_batch` | `POST …/close-batch` |
+| 读 spill | `edgeops_read_chat_data` | `GET /api/integration/spill/read` |
+
+完整 contracts 见 `openclaw.plugin.json`。Hermes 用户见 [claw-skills](../claw-skills/README.md)；MCP 见 [services/edgeops_mcp](../services/edgeops_mcp/README.md)。
 
 所有 HTTP 均在 **OpenClaw Gateway / 插件进程** 内通过 `fetch` 完成；**Bearer** 只来自插件配置 **或** OpenClaw 密钥引用，不应出现在本机 `exec` 或用户粘贴的命令里。
 
