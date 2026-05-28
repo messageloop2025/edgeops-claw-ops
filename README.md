@@ -43,7 +43,28 @@
 | 批量关 | `edgeops_ssh_channel_close_batch` | `POST …/close-batch` |
 | 读 spill | `edgeops_read_chat_data` | `GET /api/integration/spill/read` |
 
-完整 contracts 见 `openclaw.plugin.json`。Hermes 用户见 [claw-skills](../claw-skills/README.md)；MCP 见 [services/edgeops_mcp](../services/edgeops_mcp/README.md)。
+完整 contracts 见 `openclaw.plugin.json`（**v1.1.0+**：22 核心 + manifest 动态扩展 + `edgeops_invoke`）。
+
+### 扩展工具（P1/P2，v1.1.0+ manifest 动态注册）
+
+Gateway **启动**或 **`edgeops_gateway_ping`** 时拉取 **`GET /api/integration/claw-ops/manifest`** 的 `extended_tools`，对尚未注册项 **`registerTool`**；执行仍走 **`POST …/invoke`**。EdgeOps 后台在 `claw_ops_registry.py` 新增工具后，**重启 Gateway 即可**出现在模型工具列表（无需改插件 fallback）。离线或 manifest 失败时用 `manifest-fallback.ts` 兜底。
+
+**编排式后台 ops（orchestrate）仅 MCP**，本插件不提供。
+
+Hermes 用户见 [claw-skills](../claw-skills/README.md)；**Cursor MCP** 见 [services/edgeops_mcp](../services/edgeops_mcp/README.md)（47 工具超集）。
+
+---
+
+## 服务端驱动（减少插件发版）
+
+| 能力 | EdgeOps API | 说明 |
+|------|-------------|------|
+| **系统提示词** | `GET /api/integration/claw-ops/manifest` | 启动/`gateway_ping` 拉取，注入 `before_prompt_build` |
+| **扩展工具 schema** | 同上 `extended_tools` | v1.1.0+ 启动/ping 时 **动态 registerTool**；执行走 invoke |
+| **版本检查** | `GET …/check-update?plugin_version=` | 低于推荐版本时在提示词顶部提醒 |
+| **通用调用** | `POST …/invoke` | manifest 尚未同步时的兜底；或显式按名调用 |
+
+后续在 EdgeOps 侧改 `services/claw_ops_registry.py` 即可扩展工具/提示词；**重启 Gateway 加载新具名工具**。**仅当 invoke 协议、核心工具签名或 OpenClaw registerTool 行为变化时才需发 claw-ops 新版本**。
 
 所有 HTTP 均在 **OpenClaw Gateway / 插件进程** 内通过 `fetch` 完成；**Bearer** 只来自插件配置 **或** OpenClaw 密钥引用，不应出现在本机 `exec` 或用户粘贴的命令里。
 

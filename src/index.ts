@@ -6,6 +6,16 @@ import { shouldBlockLocalEdgeOpsShell } from "./edgeops-exec-guard.js";
 import { OPENCLAW_DOWNSTREAM_FORMAT_BLOCK } from "./openclaw-output-policy.js";
 import { buildClawOpsPrependSystemContext } from "./openclaw-system-prompt.js";
 import { registerSshChannelTools } from "./ssh-channel-tools.js";
+import {
+  bootstrapExtendedTools,
+  getCachedSystemPrompt,
+  getUpdateNotice,
+  initExtendedToolRegistry,
+  refreshClawOpsManifest,
+  registerInvokeTool,
+  syncExtendedToolsFromManifest,
+} from "./manifest-tools.js";
+import { FALLBACK_EXTENDED_TOOLS } from "./manifest-fallback.js";
 
 /** 安装/启动时可无 token；调用工具前再校验。 */
 function resolvePluginConfig(raw: Record<string, unknown> | undefined): {
@@ -75,9 +85,14 @@ export default definePluginEntry({
       api.pluginConfig as Record<string, unknown> | undefined,
     );
 
-    api.on("before_prompt_build", () => ({
-      prependSystemContext: buildClawOpsPrependSystemContext(cfg.baseUrl),
-    }));
+    api.on("before_prompt_build", () => {
+      const remote = getCachedSystemPrompt();
+      const notice = getUpdateNotice();
+      const base =
+        remote ?? buildClawOpsPrependSystemContext(cfg.baseUrl);
+      const prepend = notice ? `${notice}\n\n${base}` : base;
+      return { prependSystemContext: prepend };
+    });
 
     api.on("before_tool_call", (event) => {
       if (!cfg.blockLocalEdgeOpsExec) {
@@ -106,6 +121,9 @@ export default definePluginEntry({
       parameters: Type.Object({}),
       async execute(_id) {
         const data = await clientOrThrow(cfg).getVersion();
+        if (cfg.accessToken) {
+          void refreshClawOpsManifest(() => clientOrThrow(cfg), cfg.baseUrl);
+        }
         return okResult(data);
       },
     });
@@ -351,5 +369,12 @@ export default definePluginEntry({
     });
 
     registerSshChannelTools(api, () => clientOrThrow(cfg), okResult);
+    initExtendedToolRegistry(api, () => clientOrThrow(cfg), okResult);
+    registerInvokeTool(api, () => clientOrThrow(cfg), okResult);
+    if (cfg.accessToken) {
+      void bootstrapExtendedTools(() => clientOrThrow(cfg), cfg.baseUrl);
+    } else {
+      syncExtendedToolsFromManifest(FALLBACK_EXTENDED_TOOLS);
+    }
   },
 });

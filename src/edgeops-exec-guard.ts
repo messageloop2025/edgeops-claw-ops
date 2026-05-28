@@ -8,6 +8,9 @@ const EDGEOPS_PATH_MARKERS = [
   "/api/integration",
   "ops-chat/complete",
   "api/integration/ops-chat",
+  "api/integration/claw-ops",
+  "claw-ops/manifest",
+  "claw-ops/invoke",
 ];
 
 /** 若同时出现 version 请求与明显本机 EdgeOps 根，也拦截（减少误杀：仅在与 host 线索共存时）。 */

@@ -1,7 +1,7 @@
 {
   "name": "@edgeops/claw-ops",
-  "version": "0.9.1",
-  "description": "ClawOps: OpenClaw plugin for EdgeOps ops — hosts, health, integration ops chat (edgeops_*)",
+  "version": "1.1.0",
+  "description": "ClawOps: OpenClaw plugin for EdgeOps — manifest 动态注册扩展工具，服务端管理提示词",
   "type": "module",
   "license": "MIT-0",
   "repository": {

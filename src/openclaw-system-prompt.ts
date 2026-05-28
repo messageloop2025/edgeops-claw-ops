@@ -26,7 +26,9 @@ export function buildClawOpsPrependSystemContext(baseUrl: string): string {
 
     `- **资产解析**：\`edgeops_search_hosts\` / \`edgeops_search_hosts_by_prompt\` / \`edgeops_get_host_prompt\` → 解析 host_id。`,
 
-    `- **非交互远程命令**：\`edgeops_ops_chat\` 内 Agent 会用 ssh_execute；ClawOps 侧也可直接编排。`,
+    `- **短命令**：优先 \`edgeops_ssh_execute\`（长任务 detach + poll_log）；勿为单条命令走 ops_chat。`,
+
+    `- **非交互远程命令**：复杂多步仍可用 \`edgeops_ops_chat\`；简单命令用 \`edgeops_ssh_execute\`。`,
 
     `- **交互式 SSH（无界面）**：sudo 密码、vi、多步向导、Ctrl+C → **必须用** \`edgeops_ssh_channel_*\` 管道：create → send → read_lines/has_new → close；**禁止**用本机 shell 模拟 SSH。`,
 

@@ -14,6 +14,7 @@ function normalizeBaseUrl(url: string): string {
 
 /** 与 EdgeOps httpx read=300s 对齐，略留余量。 */
 const DEFAULT_FETCH_TIMEOUT_MS = 330_000;
+const INTEGRATION_CLIENT = "openclaw";
 
 export type OpsChatCompleteResponse = {
   success?: boolean;
@@ -75,6 +76,7 @@ export function createEdgeOpsClient(config: ClawOpsPluginConfig) {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
         "Content-Type": "application/json",
+        "X-EdgeOps-Client": INTEGRATION_CLIENT,
         ...(init?.headers as Record<string, string> | undefined),
       },
     });
@@ -409,6 +411,54 @@ export function createEdgeOpsClient(config: ClawOpsPluginConfig) {
         `/api/integration/spill/read?${qs}`,
         { method: "GET" },
         { timeoutMs: 120_000 },
+      );
+    },
+
+    /** ClawOps manifest（GET /api/integration/claw-ops/manifest） */
+    async getClawOpsManifest(params?: {
+      base_url?: string;
+      plugin_version?: string;
+      capabilities_version?: string;
+    }): Promise<import("./manifest-fallback.js").ClawOpsManifest> {
+      const qs = new URLSearchParams();
+      if (params?.base_url?.trim()) qs.set("base_url", params.base_url.trim());
+      if (params?.plugin_version?.trim()) {
+        qs.set("plugin_version", params.plugin_version.trim());
+      }
+      if (params?.capabilities_version?.trim()) {
+        qs.set("capabilities_version", params.capabilities_version.trim());
+      }
+      const suffix = qs.toString() ? `?${qs}` : "";
+      return requestJson(
+        `/api/integration/claw-ops/manifest${suffix}`,
+        { method: "GET" },
+        { timeoutMs: 30_000 },
+      );
+    },
+
+    /** 检查 claw-ops 插件是否需升级 */
+    async checkClawOpsUpdate(pluginVersion: string): Promise<unknown> {
+      const qs = new URLSearchParams({ plugin_version: pluginVersion });
+      return requestJson(
+        `/api/integration/claw-ops/check-update?${qs}`,
+        { method: "GET" },
+        { timeoutMs: 15_000 },
+      );
+    },
+
+    /** 统一 invoke（POST /api/integration/claw-ops/invoke） */
+    async invokeTool(
+      tool: string,
+      args: Record<string, unknown> = {},
+      options?: { timeoutMs?: number },
+    ): Promise<unknown> {
+      return requestJson(
+        "/api/integration/claw-ops/invoke",
+        {
+          method: "POST",
+          body: JSON.stringify({ tool, arguments: args }),
+        },
+        { timeoutMs: options?.timeoutMs ?? DEFAULT_FETCH_TIMEOUT_MS },
       );
     },
   };

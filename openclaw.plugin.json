@@ -1,8 +1,8 @@
 {
   "id": "claw-ops",
   "name": "EdgeOps",
-  "description": "EdgeOps (claw-ops)：OpenClaw 侧 EdgeOps 运维 / ops 插件。edgeops_* 在 Gateway 内直连 EdgeOps API，无 EdgeOps Web 页/终端 UI 依赖；注入路由提示并可拦截本机 shell 调 EdgeOps。",
-  "version": "0.9.1",
+  "description": "EdgeOps (claw-ops)：OpenClaw 侧 EdgeOps 运维。核心工具内置；P1/P2 扩展由服务端 manifest 启动时动态 registerTool，提示词后台可更新。",
+  "version": "1.1.0",
   "contracts": {
     "tools": [
       "edgeops_gateway_ping",
@@ -26,7 +26,28 @@
       "edgeops_ssh_channel_close",
       "edgeops_ssh_channel_dump",
       "edgeops_ssh_channel_close_batch",
-      "edgeops_read_chat_data"
+      "edgeops_read_chat_data",
+      "edgeops_invoke",
+      "edgeops_ssh_execute",
+      "edgeops_list_host_groups",
+      "edgeops_get_host_groups_tree",
+      "edgeops_get_group_hosts",
+      "edgeops_probe_host_capabilities",
+      "edgeops_get_host_capabilities",
+      "edgeops_update_host_prompt",
+      "edgeops_append_host_prompt",
+      "edgeops_list_maintenance_history",
+      "edgeops_list_operation_logs",
+      "edgeops_remote_fs_list",
+      "edgeops_remote_fs_read",
+      "edgeops_remote_fs_write",
+      "edgeops_list_batch_jobs",
+      "edgeops_get_batch_job",
+      "edgeops_list_scheduled_tasks",
+      "edgeops_get_scheduled_task",
+      "edgeops_list_triggered_tasks",
+      "edgeops_get_triggered_task",
+      "edgeops_list_session_messages"
     ]
   },
   "uiHints": {
